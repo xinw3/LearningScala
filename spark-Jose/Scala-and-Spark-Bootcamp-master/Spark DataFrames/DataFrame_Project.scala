@@ -10,7 +10,7 @@ val spark = SparkSession.builder().getOrCreate()
 val df = spark.read.option("header", "true").option("inferSchema", "true").csv("Netflix_2011_2016.csv")
 // What are the column names?
 // Date, Open, High, Low, Close, Volume, Adj Close
-println("Column Names")
+println("Column Names:")
 df.columns
 
 // What does the Schema look like?
@@ -55,12 +55,14 @@ println("How many days was the Close lower than $600:")
 df.filter($"Close" < 600).count()
 // What percentage of the time was the High greater than $500 ?
 println("What percentage of the time was the High greater than $500?")
-df.filter($"High" > 500).count().toFloat / df.count()
+df.filter($"High" > 500).count().toFloat / df.count() * 100
 // What is the Pearson correlation between High and Volume?
 println("What is the Pearson correlation between High and Volume?")
 df.select(corr("High", "Volume")).show()
 // What is the max High per year?
-df.select(max("High")).show()
+println("What is the max High per year?")
+val df_add_year = df.withColumn("Year", year(df("Date")))
+df_add_year.groupBy("Year").max("High").orderBy("Year").show()
 // What is the average Close for each Calender Month?
 val df_add_month = df.withColumn("Month", month(df("Date")))
 df_add_month.groupBy("Month").mean("Close").orderBy("Month").show()
